@@ -21,11 +21,12 @@ time_gap_threshold: 1 # The time gap in seconds considered as the start of a new
 end_speech_delay: 1 # The delay in seconds after the last speech to determine the end of speech
 
 # Delay in seconds to record extra sound after VAD detected pause in last speech segment
-post_speech_buffer_duration: 05 # Additional buffer duration in seconds to capture trailing audio
+post_speech_buffer_duration: 0 # Additional buffer duration in seconds to capture trailing audio
 
 # Kafka configuration
 kafka:
   broker: "localhost:9092" # The Kafka broker address and port
   topic_transcriptions_all: "agent.requests" # The Kafka topic to publish all transcriptions
   schema_registry_url: "http://localhost:8081" # The URL for the schema registry
-  schema_location: "schemas/transcription_value.avsc"
+  agent_requests_schema_location: "schemas/agent_requests.avsc"
+  agent_decision_schema_location: "schemas/agent_decision.avsc"

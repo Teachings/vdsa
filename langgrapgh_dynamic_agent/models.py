@@ -1,12 +1,14 @@
 from typing import TypedDict
 from pydantic import BaseModel, Field
 
-class KafkaMessage(BaseModel):
+class AgentDecision(BaseModel):
     timestamp: str
-    text: str
     user: str
+    initial_request: str
+    preprocessor_agent_result: str
+    extracted_python_code: str
+    final_output: str
 
-# Define the structure of the review result using Pydantic
 class CodeReviewResult(BaseModel):
     result: str = Field(..., description="The result of the code review: 'correct' or 'incorrect'.")
     message: str = Field(..., description="Optional message returned by the review agent.")

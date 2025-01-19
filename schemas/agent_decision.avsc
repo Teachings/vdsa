@@ -1,0 +1,14 @@
+{
+    "type": "record",
+    "name": "AgentDecision",
+    "namespace": "agent.transcription",
+    "fields": [
+      { "name": "timestamp", "type": "string" },
+      { "name": "user", "type": "string" },
+      { "name": "initial_request", "type": "string" },
+      { "name": "preprocessor_agent_result", "type": "string" },
+      { "name": "extracted_python_code", "type": "string" },
+      { "name": "final_output", "type": "string" }
+    ]
+  }
+  

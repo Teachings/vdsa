@@ -3,6 +3,7 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer, AvroSerializer
 from confluent_kafka.serialization import StringDeserializer, StringSerializer
 from workflow_langgrapgh_dynamic_agent import app  # Import compiled LangGraph workflow
+from models import AgentState, AgentDecision
 from helpers import log, load_config
 import json
 
@@ -12,18 +13,22 @@ BROKER = config["kafka"]["broker"]
 TOPIC_INPUT = config["kafka"]["topic_transcriptions_all"]
 TOPIC_OUTPUT = "agent.response"
 SCHEMA_REGISTRY_URL = config["kafka"]["schema_registry_url"]
-SCHEMA_LOCATION = config["kafka"]["schema_location"]
+AGENT_REQUESTS_SCHEMA_LOCATION = config["kafka"]["agent_requests_schema_location"]
+AGENT_DECISION_SCHEMA_LOCATION = config["kafka"]["agent_decision_schema_location"]
 
 # Initialize Schema Registry Client
 schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
 
 # Load Avro schema
-with open(SCHEMA_LOCATION, "r") as schema_file:
-    value_schema_str = schema_file.read()
-
+with open(AGENT_REQUESTS_SCHEMA_LOCATION, "r") as schema_file:
+    agent_requests_value_schema_str = schema_file.read()
 # Avro serializers/deserializers
-avro_deserializer = AvroDeserializer(schema_registry_client, value_schema_str)
-avro_serializer = AvroSerializer(schema_registry_client, value_schema_str)
+avro_deserializer = AvroDeserializer(schema_registry_client, agent_requests_value_schema_str)
+
+with open(AGENT_DECISION_SCHEMA_LOCATION, "r") as schema_file:
+    agent_decision_value_schema_str = schema_file.read()
+#to produce messages for agent_decision topic
+avro_serializer = AvroSerializer(schema_registry_client, agent_decision_value_schema_str)
 
 # Consumer configuration
 consumer_config = {
@@ -81,20 +86,22 @@ def consume_messages():
             # Invoke the workflow
             try:
                 result = app.invoke(agent_state)
-                agent_response = result.get("final_output", "")
 
-                # Prepare response for Kafka
-                response_data = {
-                    "timestamp": transcription_data["timestamp"],
-                    "text": agent_response,
-                    "user": transcription_data["user"]
-                }
+                # Construct AgentDecision object
+                agent_decision = AgentDecision(
+                    timestamp=transcription_data["timestamp"],
+                    user=transcription_data["user"],
+                    initial_request=agent_state["initial_request"],
+                    preprocessor_agent_result=result.get("preprocessor_agent_result", ""),
+                    extracted_python_code=result.get("extracted_python_code", ""),
+                    final_output=result.get("final_output", "")
+                )
 
                 # Publish response back to Kafka
-                producer.produce(topic=TOPIC_OUTPUT, key=None, value=response_data)
+                producer.produce(topic=TOPIC_OUTPUT, key=None, value=agent_decision.model_dump())
                 producer.flush()
 
-                log(f"Agent response published to {TOPIC_OUTPUT}: {response_data}", level="INFO", color="green")
+                log(f"Agent decision published to {TOPIC_OUTPUT}: {agent_decision.model_dump()}", level="INFO", color="green")
 
             except Exception as e:
                 log(f"Error processing message: {e}", level="ERROR", color="red")

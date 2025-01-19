@@ -31,7 +31,7 @@ def produce_message(message_dict):
     config = load_config()
     BROKER = config["kafka"]["broker"]
     TOPIC_NAME = config["kafka"]["topic_transcriptions_all"]
-    SCHEMA_LOCATION = config["kafka"]["schema_location"]
+    SCHEMA_LOCATION = config["kafka"]["agent_requests_schema_location"]
     SCHEMA_REGISTRY_URL = config["kafka"]["schema_registry_url"]
 
     # Initialize Schema Registry Client

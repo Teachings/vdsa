@@ -1,7 +1,7 @@
 {
   "type": "record",
-  "name": "TranscriptionSegment",
-  "namespace": "sts.transcription",
+  "name": "AgentRequest",
+  "namespace": "agent.transcription",
   "fields": [
     { "name": "timestamp", "type": "string" },
     { "name": "text", "type": "string" },
