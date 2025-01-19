@@ -18,7 +18,6 @@ lightning-whisper-mlx
 kafka-python
 pydantic
 pydub
-psycopg2-binary
 requests
 PyYAML
 confluent-kafka[avro]

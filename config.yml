@@ -26,6 +26,6 @@ post_speech_buffer_duration: 05 # Additional buffer duration in seconds to captu
 # Kafka configuration
 kafka:
   broker: "localhost:9092" # The Kafka broker address and port
-  topic_transcriptions_all: "transcriptions.all" # The Kafka topic to publish all transcriptions
+  topic_transcriptions_all: "agent.requests" # The Kafka topic to publish all transcriptions
   schema_registry_url: "http://localhost:8081" # The URL for the schema registry
   schema_location: "schemas/transcription_value.avsc"
