@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, END
 from agents import AgentState
-from agents import agent_preprocessor, agent_code_generation, agent_extract_code, agent_code_review, agent_execute_code_in_docker 
-from agents import conditional_should_continue_after_extraction, conditional_should_continue_after_code_review
+from agents import agent_preprocessor, agent_code_generation, agent_extract_code, agent_code_review, agent_execute_code_in_docker, agent_concise_llm_output 
+from agents import conditional_should_continue_after_extraction, conditional_should_continue_after_code_review, conditional_should_continue_after_docker_run
 
 # Create a StateGraph to model the workflow
 workflow = StateGraph(AgentState)
@@ -12,6 +12,7 @@ workflow.add_node("agent_code_generation", agent_code_generation)
 workflow.add_node("agent_extract_code", agent_extract_code)
 workflow.add_node("agent_code_review", agent_code_review)
 workflow.add_node("agent_execute_code_in_docker", agent_execute_code_in_docker)
+workflow.add_node("agent_concise_llm_output", agent_concise_llm_output)
 
 # Set entry point
 workflow.set_entry_point("agent_preprocessor")
@@ -38,7 +39,16 @@ workflow.add_conditional_edges(
     }
 )
 
-workflow.add_edge("agent_execute_code_in_docker", END)
+workflow.add_conditional_edges(
+    "agent_execute_code_in_docker",
+    conditional_should_continue_after_docker_run,
+    {
+        "continue": "agent_concise_llm_output",
+        "regenerate": "agent_code_generation"
+    }
+)
+
+workflow.add_edge("agent_concise_llm_output", END)
 
 # Compile the workflow
 app = workflow.compile()

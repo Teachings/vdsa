@@ -1,54 +1,146 @@
 
-# Langgraph: Tutorial and Implementation with Dynamic Agent
+# Voice-DSA: Dynamic Speech Agent System
 
-This repository contains tutorials and an implementation using a dynamic agent named LangGraph. Below are instructions for setting up a conda environment and running the provided code.
+A real-time speech-to-text processing system with dynamic LangGraph agent responses, powered by Kafka-based communication.
 
-## Table of Contents
-1. **Setting Up the Conda Environment**
-2. **Running the Code**
-3. **Repository Structure Overview**
-4. **Additional Notes**
+## Features
 
-## 1. Setting Up the Conda Environment
+- **Real-time Speech Recognition**
+  - Voice Activity Detection (VAD)
+  - Multi-device microphone support
+  - Configurable audio processing
+- **Dynamic Agent System**
+  - LangGraph workflow management
+  - Code generation & execution
+  - Docker-based code sandboxing
+- **Distributed Architecture**
+  - Kafka message broker
+  - Modular service design
+  - Scalable components
 
-To run the code, you need to set up a conda environment named `langgraph`. Follow these steps:
+## Prerequisites
 
-### Step 1: Install Miniconda or Anaconda
-If you don't have conda installed, download and install Miniconda or Anaconda from [the official website](https://docs.conda.io/en/latest/miniconda.html).
+- Conda (Miniconda or Anaconda)
+- Python 3.8+
+- Kafka server running locally
+- NVIDIA GPU (recommended) or Apple Silicon
+- Microphone
 
-### Step 2: Create and activate the Environment
-Open a terminal and run the following command to create your environment:
+## Installation
 
-```bash
-conda create --name langgraph
-conda activate langgraph
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/yourusername/voice-dsa.git
+   cd voice-dsa
+   ```
+
+2. **Create Conda Environment**
+   ```bash
+   conda create -n vdsa python=3.8
+   conda activate vdsa
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set Up Kafka**
+   ```bash
+   # Start Kafka server (requires Docker)
+   docker-compose up -d
+   ```
+
+## Configuration
+
+Edit `config.yml` for your environment:
+```yaml
+device: "cuda"  # or "mps"/"cpu"
+voice-model: "large-v3-turbo"
+kafka:
+  broker: "localhost:9092"
+  topic_dsa: "dsa.agent.requests"
+  topic_dsa_response: "dsa.agent.response"
 ```
 
-### Step 3: Install requirements
+## Usage
 
+### Method 1: Unified Launcher (Recommended)
 ```bash
-pip install -r requirements.txt
+conda activate vdsa
+python launcher.py
 ```
 
-## 2. Running the Code
+**Features:**
+- Starts both STT and DSA services
+- Automatic log management (`logs/` directory)
+- Graceful shutdown (Ctrl+C)
 
-Navigate to the `tutorials` folder and run the specific tutorial script as follows:
+### Method 2: Manual Execution
+**Terminal 1 - Speech Recognition:**
+```bash
+conda activate vdsa
+python stt/main.py
+```
 
-- **For Python Scripts**: Open a terminal, navigate to the `tutorials` directory, and execute the Python script with Python or use an IDE that supports Python environments. For example:
+**Terminal 2 - Agent System:**
+```bash
+conda activate vdsa
+python langgrapgh_dynamic_agent/dsa.py
+```
+
+## System Architecture
+
+```
+┌─────────────┐       ┌─────────────┐
+│ Speech-to-  │       │ Dynamic     │
+│ Text (STT)  │◄─────►│ Agent (DSA) │
+└──────┬──────┘ Kafka └──────┬──────┘
+       │                      │
+       ▼                      ▼
+  Microphone Input      Agent Responses
+```
+
+## Logging
+
+- **Launcher Mode:**
+  - STT logs: `logs/stt.log`
+  - DSA logs: `logs/dsa.log`
+  
+- **Manual Mode:**
   ```bash
-  cd tutorials
-  python 01-basic_langgraph.py
+  tail -f stt/debug.log
+  tail -f langgrapgh_dynamic_agent/agent.log
   ```
 
-## 3. Repository Structure Overview
+## Troubleshooting
 
-- **requirements.txt**: Lists all necessary packages for this project.
-- **readme.md**: This file, providing instructions and information about the repository.
-- **tutorials/**: Contains various tutorials related to LangGraph.
-  - `01-basic_langgraph.py`: An example Python script demonstrating a basic usage of LangGraph.
-- **langgraph_dynamic_agent/**: Contains implementation details for LangGraph dynamic agent.
-  - `workflow_langgrapgh_dynamic_agent.py`: The main script for running the LangGraph dynamic agent implementation.
+**Common Issues:**
+1. **Microphone Not Found**
+   - Check `config.yml` favorite_microphones
+   - List devices with `python stt/audio_utils.py`
 
-## 4. Additional Notes
+2. **Conda Environment Issues**
+   ```bash
+   conda deactivate
+   conda activate vdsa
+   ```
 
-Ensure that your terminal or command prompt is set to use the environment you created (`langgraph`). You can activate this environment anytime using `conda activate langgraph`. If you encounter any issues with dependencies, refer back to the section on setting up the conda environment for troubleshooting tips.
+3. **Kafka Connection Errors**
+   ```bash
+   docker-compose restart
+   ```
+
+## License
+
+MIT License - See [LICENSE](LICENSE)
+```
+
+Key features of this README:
+1. Clear installation and setup instructions for both launch methods
+2. Architecture diagram for system understanding
+3. Troubleshooting common issues
+4. Configuration guidance
+5. License information
+
+The document balances technical detail with usability, making it accessible for both developers and end-users. You can customize the Kafka setup instructions and license information as needed for your specific implementation.

@@ -205,3 +205,67 @@ code_review_prompt_template = PromptTemplate(
     """,
     input_variables=["generated_code", "initial_request"],
 )
+
+concise_llm_prompt_template = PromptTemplate(
+    template="""
+    You are a response formatting agent for a voice assistant. Generate a spoken response that directly answers the request using the code output.
+
+    Requirements:
+    - Convert the final output into a natural, conversational sentence
+    - Keep responses to ONE short, grammatically correct sentence
+    - Round numerical values to 2-3 decimal places where appropriate
+    - Always include summary from both REQUEST and OUTPUT in the final response
+    - Maintain context from the initial request
+    - Use natural phrasing (e.g. "approximately" for decimals)
+    - Use natural phrasing (e.g. "is" instead of "equals" for integers)  
+    - No markdown, special formatting, or technical jargon
+
+    Examples:
+
+    Example 1:
+    REQUEST: Calculate factorial of 10
+    OUTPUT: 3628800
+    RESPONSE: The factorial of 10 is 3628800.
+
+    Example 2:
+    REQUEST: Count Rs in strawberry
+    OUTPUT: 2
+    RESPONSE: There are 2 R's in "strawberry".
+
+    Example 3:
+    REQUEST: Tell a joke
+    OUTPUT: Why did the chicken cross the road?
+    RESPONSE: Why did the chicken cross the road? To get to the other side!
+
+    Example 4:
+    REQUEST: Multiply 15 by 3
+    OUTPUT: 45
+    RESPONSE: 15 multiplied by 3 is 45.
+
+    Example 5:
+    REQUEST: Convert 100°F to Celsius
+    OUTPUT: 37.77777777777778
+    RESPONSE: 100°F is approximately 37.78°C.
+
+    Example 6:
+    REQUEST: Square root of 2
+    OUTPUT: 1.41421356237
+    RESPONSE: The square root of 2 is approximately 1.414.
+
+    Example 7:
+    REQUEST: What is 88 x 99?
+    OUTPUT: 8712
+    RESPONSE: The product of 88 and 99 is 8712.
+
+    Example 8:
+    REQUEST: What is 55 plus 4?
+    OUTPUT: 59
+    RESPONSE: 55 plus 4 is 59.
+
+    Now create a voice-friendly response:
+    REQUEST: {initial_request}
+    OUTPUT: {final_output}
+    RESPONSE:
+    """,
+    input_variables=["initial_request", "final_output"],
+)

@@ -51,7 +51,8 @@ def consume_messages():
                 "generated_code_result": "",
                 "extracted_python_code": "",
                 "code_review_result": "",
-                "final_output": ""
+                "final_output": "",
+                "concise_llm_output": ""
             }
 
             try:
@@ -65,7 +66,8 @@ def consume_messages():
                     initial_request=agent_state["initial_request"],
                     preprocessor_agent_result=result.get("preprocessor_agent_result", ""),
                     extracted_python_code=result.get("extracted_python_code", ""),
-                    final_output=result.get("final_output", "")
+                    final_output=result.get("final_output", ""),
+                    concise_llm_output=result.get("concise_llm_output", "")
                 )
 
                 # Publish response back to Kafka

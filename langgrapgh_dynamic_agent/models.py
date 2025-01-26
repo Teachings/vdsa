@@ -8,11 +8,14 @@ class AgentDecision(BaseModel):
     preprocessor_agent_result: str
     extracted_python_code: str
     final_output: str
+    concise_llm_output: str
 
 class CodeReviewResult(BaseModel):
     result: str = Field(..., description="The result of the code review: 'correct' or 'incorrect'.")
     message: str = Field(..., description="Optional message returned by the review agent.")
 
+class ConciseLLMOutput(BaseModel):
+    message: str = Field(..., description="response returned by LLM")
 
 # Define the state
 class AgentState(TypedDict):
@@ -24,3 +27,4 @@ class AgentState(TypedDict):
     code_review_result: CodeReviewResult
     code_review_status: str
     final_output: str
+    concise_llm_output: str

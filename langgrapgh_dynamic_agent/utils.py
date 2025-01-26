@@ -1,5 +1,5 @@
 from termcolor import colored
-from models import AgentState, CodeReviewResult
+from models import AgentState, CodeReviewResult, ConciseLLMOutput
 
 def pretty_print_state_enhanced(agent_state: AgentState):
     print('-' * 50)

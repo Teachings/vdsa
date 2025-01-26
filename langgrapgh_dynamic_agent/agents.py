@@ -5,15 +5,20 @@ import tempfile
 import os
 from pydantic import ValidationError
 from langchain_ollama import ChatOllama
-from models import CodeReviewResult, AgentState
+from models import CodeReviewResult, AgentState, ConciseLLMOutput
 from utils import pretty_print_state_enhanced
 
 
 # Import the prompt templates from the new file
-from prompts import preprocessor_prompt_template, code_generation_prompt_template, code_review_prompt_template
+from prompts import preprocessor_prompt_template, code_generation_prompt_template, code_review_prompt_template, concise_llm_prompt_template
 
 # Define model
 model = ChatOllama(
+    base_url="http://localhost:11434",
+    model="llama3.2" #deepseek-coder-v2 nemotron qwen2.5-coder:32b llama3.2
+)
+
+model_code_generator = ChatOllama(
     base_url="http://localhost:11434",
     model="llama3.2" #deepseek-coder-v2 nemotron qwen2.5-coder:32b llama3.2
 )
@@ -27,13 +32,15 @@ model_json = ChatOllama(
 
 # Initialize models for preprocessor, code generation, and code review agents
 preprocessor_model = model
-code_generator_model = model
+code_generator_model = model_code_generator
 code_review_model = model_json.with_structured_output(CodeReviewResult)
+concise_output_model = model_json.with_structured_output(ConciseLLMOutput)
 
 # Initialize chains for preprocessor, code generation, and code review agents
 preprocessor_agent_generator = preprocessor_prompt_template | preprocessor_model
 agent_code_generator = code_generation_prompt_template | code_generator_model
 code_review_agent_generator = code_review_prompt_template | code_review_model
+concise_output_agent_generator = concise_llm_prompt_template | concise_output_model
 
 def agent_preprocessor(state: AgentState):
     print(colored("DEBUG: Preprocessing User Request...", "magenta"))
@@ -202,3 +209,40 @@ def agent_execute_code_in_docker(state: AgentState):
     pretty_print_state_enhanced(state)
 
     return state
+
+def conditional_should_continue_after_docker_run(state: AgentState):
+    # Return "regenerate" if final_output is None or an empty string; otherwise, return "continue".
+    if state["final_output"] is None or state["final_output"] == "":
+        return "regenerate"
+    else:
+        return "continue"
+    
+def agent_concise_llm_output(state: AgentState):
+    print(colored("DEBUG: Creating Concise LLM Output...", "magenta"))
+    
+    concise_llm_output = concise_output_agent_generator.invoke({"initial_request": state["initial_request"], "final_output": state["final_output"]})
+
+    try:
+        
+        # Print and store in agent state
+        # print(colored("Concise Output:", "yellow"))
+        if isinstance(concise_llm_output, ConciseLLMOutput):
+            # print(f"Message: {concise_llm_output.message}")
+            state["concise_llm_output"] = concise_llm_output.message
+        else:
+            state["concise_llm_output"] = "Please ask the question again, sir!"
+            print("Unexpected response format from agent_concise_llm_output.")
+        
+
+    except ValidationError as e:
+        print(colored(f"ERROR: Code review validation failed with error: {e}", "red"))
+        state["concise_llm_output"] = "Please ask the question again, sir!"
+    
+    except Exception as e:
+        print(colored(f"ERROR: Error parsing JSON: {e}", "red"))
+        state["concise_llm_output"] = "Please ask the question again, sir!"
+    
+    print(colored("DEBUG: agent_concise_llm_output state", "magenta"))
+    pretty_print_state_enhanced(state)
+
+    return state  # Always return state
