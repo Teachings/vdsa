@@ -28,6 +28,40 @@ preprocessor_prompt_template = PromptTemplate(
         * Format: Return the calculated factorial value
     - **Specific Requirement**: Ensure the code handles potential overflow/errors for large input values (if applicable)
 
+    Example 2:
+    USER REQUEST: How many Rs are in the word strawberry.
+    OUTPUT: 
+    Generate Python code to:
+    - **Functionality**: Count Alphabets in a Word
+    - **Input**:
+        * Word: `strawberry` (string)
+        * Alphabet: `R` (character)
+    - **Operation**: 
+        * Convert both the input word and the character to lowercase.
+        * Iterate through each character in the input word.
+        * Check if it matches the specified alphabet.
+        * Count the occurrences.
+    - **Library/Module**: Utilize the built-in Python string and list data types.
+    - **Output**:
+        * Data Type: Integer
+        * Format: Return the total count of the specified alphabet.
+
+    Example 3:
+    USER REQUEST: Tell me a joke.
+    OUTPUT:         
+    Generate Python code to:
+    - **Functionality**: Joke Picker Program
+    - **Input**:
+        * Number of Jokes: `1`
+    - **Operation**: 
+        * Create a list of predefined jokes.
+        * Select one randomly from the list.
+        * Display the selected joke.
+    - **Library/Module**: Utilize the `random` library.
+    - **Output**:
+        * Data Type: String
+        * Format: Display the selected joke.
+
     Now, based on the user's request, generate a clear and structured task for the Python code generator.
     USER REQUEST: {user_request}
     OUTPUT:

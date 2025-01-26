@@ -20,4 +20,4 @@ pydantic
 pydub
 requests
 PyYAML
-confluent-kafka[avro]
+confluent-kafka

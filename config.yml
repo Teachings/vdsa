@@ -26,7 +26,7 @@ post_speech_buffer_duration: 0 # Additional buffer duration in seconds to captur
 # Kafka configuration
 kafka:
   broker: "localhost:9092" # The Kafka broker address and port
-  topic_transcriptions_all: "agent.requests" # The Kafka topic to publish all transcriptions
-  schema_registry_url: "http://localhost:8081" # The URL for the schema registry
-  agent_requests_schema_location: "schemas/agent_requests.avsc"
-  agent_decision_schema_location: "schemas/agent_decision.avsc"
+  topic_dsa: "dsa.agent.requests" # The Kafka topic to publish all transcriptions
+  topic_dsa_response: "dsa.agent.response" # The Kafka topic to publish all agent responses
+  consumer_group_dsa_name: "langgraph_dsa_consumer"
+  auto_offset_reset_dsa: "latest"

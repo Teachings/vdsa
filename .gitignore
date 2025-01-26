@@ -60,3 +60,4 @@ transcriptions_*.json
 *.png
 
 mlx_models/
+logs/
