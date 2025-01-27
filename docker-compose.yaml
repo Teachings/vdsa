@@ -20,36 +20,21 @@ services:
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_CFG_NUM_PARTITIONS=1
-    restart: always
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry:latest
-    hostname: schema-registry
-    depends_on:
-      - kafka_a
-    ports:
-      - "8081:8081"
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka_a:9094,PLAINTEXT_INTERNAL://localhost:29092
-     # SCHEMA_REGISTRY_DEBUG: 'true'
-    restart: always
+    # restart: always
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     depends_on: 
       - kafka_a
-      - schema-registry
     ports:
       - 8090:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: kafka_a
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_a:9094
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
     # volumes:
       # - ./config.yml:/etc/kafkaui/dynamic_config.yaml
-    restart: always
+    # restart: always
 
 volumes:
   kafka_data:
