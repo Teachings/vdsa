@@ -1,7 +1,6 @@
+# VDSA: Voice Dangerously Smart Agent
 
-# Voice-DSA: Dynamic Speech Agent System
-
-A real-time speech-to-text processing system with dynamic LangGraph agent responses, powered by Kafka-based communication.
+Real-time speech processing system with dynamic LangGraph agent responses using Kafka communication.
 
 ## Features
 
@@ -9,20 +8,20 @@ A real-time speech-to-text processing system with dynamic LangGraph agent respon
   - Voice Activity Detection (VAD)
   - Multi-device microphone support
   - Configurable audio processing
-- **Dynamic Agent System**
-  - LangGraph workflow management
+- **VDSA Agent System**
+  - LangGraph workflow orchestration
   - Code generation & execution
-  - Docker-based code sandboxing
+  - Docker-based sandboxing
 - **Distributed Architecture**
-  - Kafka message broker
-  - Modular service design
-  - Scalable components
+  - Kafka message streaming
+  - Modular microservices
+  - Horizontal scalability
 
 ## Prerequisites
 
-- Conda (Miniconda or Anaconda)
-- Python 3.8+
-- Kafka server running locally
+- Conda (Miniconda/Anaconda)
+- Python 3.10
+- Local Kafka instance
 - NVIDIA GPU (recommended) or Apple Silicon
 - Microphone
 
@@ -30,13 +29,13 @@ A real-time speech-to-text processing system with dynamic LangGraph agent respon
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/yourusername/voice-dsa.git
-   cd voice-dsa
+   git clone https://github.com/Teachings/vdsa.git
+   cd vdsa
    ```
 
 2. **Create Conda Environment**
    ```bash
-   conda create -n vdsa python=3.8
+   conda create -n vdsa python=3.10
    conda activate vdsa
    ```
 
@@ -45,38 +44,32 @@ A real-time speech-to-text processing system with dynamic LangGraph agent respon
    pip install -r requirements.txt
    ```
 
-4. **Set Up Kafka**
+4. **Start Kafka**
    ```bash
-   # Start Kafka server (requires Docker)
    docker-compose up -d
    ```
 
 ## Configuration
 
-Edit `config.yml` for your environment:
+`config.yml`:
 ```yaml
-device: "cuda"  # or "mps"/"cpu"
+device: "cuda"  # "mps" or "cpu"
 voice-model: "large-v3-turbo"
 kafka:
   broker: "localhost:9092"
-  topic_dsa: "dsa.agent.requests"
-  topic_dsa_response: "dsa.agent.response"
+  topic_vdsa: "vdsa.agent.requests"
+  topic_response: "vdsa.agent.response"
 ```
 
 ## Usage
 
-### Method 1: Unified Launcher (Recommended)
+### Unified Launcher
 ```bash
 conda activate vdsa
 python launcher.py
 ```
 
-**Features:**
-- Starts both STT and DSA services
-- Automatic log management (`logs/` directory)
-- Graceful shutdown (Ctrl+C)
-
-### Method 2: Manual Execution
+### Manual Execution
 **Terminal 1 - Speech Recognition:**
 ```bash
 conda activate vdsa
@@ -86,61 +79,28 @@ python stt/main.py
 **Terminal 2 - Agent System:**
 ```bash
 conda activate vdsa
-python langgrapgh_dynamic_agent/dsa.py
+python langgraph_dynamic_agent/dsa.py
 ```
 
-## System Architecture
+## Architecture
 
 ```
-┌─────────────┐       ┌─────────────┐
-│ Speech-to-  │       │ Dynamic     │
-│ Text (STT)  │◄─────►│ Agent (DSA) │
-└──────┬──────┘ Kafka └──────┬──────┘
-       │                      │
-       ▼                      ▼
-  Microphone Input      Agent Responses
+┌────────────┐       ┌─────────────┐
+│ STT Engine │       │ VDSA Agent  │
+└─────┬──────┘ Kafka └──────┬──────┘
+      │                     │
+      ▼                     ▼
+ Microphone Input      Agent Responses
 ```
 
 ## Logging
 
-- **Launcher Mode:**
-  - STT logs: `logs/stt.log`
-  - DSA logs: `logs/dsa.log`
+- **Launcher:**
+  - `logs/stt.log`
+  - `logs/vdsa.log`
   
 - **Manual Mode:**
   ```bash
   tail -f stt/debug.log
-  tail -f langgrapgh_dynamic_agent/agent.log
+  tail -f langgraph_dynamic_agent/agent.log
   ```
-
-## Troubleshooting
-
-**Common Issues:**
-1. **Microphone Not Found**
-   - Check `config.yml` favorite_microphones
-   - List devices with `python stt/audio_utils.py`
-
-2. **Conda Environment Issues**
-   ```bash
-   conda deactivate
-   conda activate vdsa
-   ```
-
-3. **Kafka Connection Errors**
-   ```bash
-   docker-compose restart
-   ```
-
-## License
-
-MIT License - See [LICENSE](LICENSE)
-```
-
-Key features of this README:
-1. Clear installation and setup instructions for both launch methods
-2. Architecture diagram for system understanding
-3. Troubleshooting common issues
-4. Configuration guidance
-5. License information
-
-The document balances technical detail with usability, making it accessible for both developers and end-users. You can customize the Kafka setup instructions and license information as needed for your specific implementation.
