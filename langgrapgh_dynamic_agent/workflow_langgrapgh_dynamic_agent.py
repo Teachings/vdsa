@@ -52,3 +52,11 @@ workflow.add_edge("agent_concise_llm_output", END)
 
 # Compile the workflow
 app = workflow.compile()
+
+# #helper method to visualize graph
+# def save_graph_to_file(runnable_graph, output_file_path):
+#     png_bytes = runnable_graph.get_graph().draw_mermaid_png()
+#     with open(output_file_path, 'wb') as file:
+#         file.write(png_bytes)
+
+# save_graph_to_file(app, "output.png")
