@@ -26,7 +26,7 @@ model_code_generator = ChatOllama(
 # Define model
 model_json = ChatOllama(
     base_url="http://localhost:11434",
-    model="llama3.2",
+    model="qwen2.5-coder",
     format="json"
 )
 
@@ -181,8 +181,7 @@ def conditional_should_continue_after_code_review(state: AgentState):
 
 def agent_execute_code_in_docker(state: AgentState):
     print(colored("DEBUG: Running code in Docker...", "magenta"))
-    # print(colored(f"DEBUG: Final Python Code to run: {state['extracted_python_code']}", "cyan"))
-
+    
     with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as temp_code_file:
         temp_code_file.write(state["extracted_python_code"].encode('utf-8'))
         temp_code_filename = temp_code_file.name
@@ -198,16 +197,16 @@ def agent_execute_code_in_docker(state: AgentState):
             stdout=True,
             stderr=True
         )
-        state["final_output"] = container_output.decode('utf-8')
-        # print(colored("DEBUG: Docker Output:", "cyan"), state["final_output"])
+        # Clean output: remove whitespace and ensure string type
+        state["final_output"] = container_output.decode('utf-8').strip()  # Strip newlines
     except docker.errors.ContainerError as e:
         print(colored(f"ERROR: Error running code in container: {str(e)}", "red"))
+        state["final_output"] = ""  # Ensure fallback value is string
     
     os.remove(temp_code_filename)
 
     print(colored("DEBUG: agent_execute_code_in_docker state", "magenta"))
     pretty_print_state_enhanced(state)
-
     return state
 
 def conditional_should_continue_after_docker_run(state: AgentState):
@@ -218,31 +217,81 @@ def conditional_should_continue_after_docker_run(state: AgentState):
         return "continue"
     
 def agent_concise_llm_output(state: AgentState):
-    print(colored("DEBUG: Creating Concise LLM Output...", "magenta"))
+    # print(colored("\n=== START CONCISE LLM AGENT ===", "magenta", attrs=["bold"]))
     
-    concise_llm_output = concise_output_agent_generator.invoke({"initial_request": state["initial_request"], "final_output": state["final_output"]})
-
     try:
+        # Debug input state structure
+        # print(colored("\n[DEBUG] RAW STATE KEYS:", "cyan"))
+        # print(list(state.keys()))
         
-        # Print and store in agent state
-        # print(colored("Concise Output:", "yellow"))
+        # Input validation and sanitization
+        # print(colored("\n[DEBUG] INPUT VALIDATION:", "cyan"))
+        initial_request = str(state.get("initial_request", "")).strip()
+        final_output = str(state.get("final_output", "")).strip()
+        
+        print(f"Initial Request (type: {type(initial_request)}): {repr(initial_request)}")
+        print(f"Final Output (type: {type(final_output)}): {repr(final_output)}")
+        
+        if not initial_request:
+            raise ValueError("Initial request is empty or missing")
+        if not final_output:
+            raise ValueError("Final output is empty or missing")
+
+        # Generator invocation
+        # print(colored("\n[DEBUG] INVOKING GENERATOR:", "cyan"))
+        generator_input = {
+            "initial_request": initial_request,
+            "final_output": final_output
+        }
+        # print("Generator input:")
+        # print(generator_input)
+        
+        concise_llm_output = concise_output_agent_generator.invoke(generator_input)
+        # print(colored("\n[DEBUG] RAW GENERATOR OUTPUT:", "cyan"))
+        # print(f"Type: {type(concise_llm_output)}")
+        # print("Content:")
+        # print(concise_llm_output)
+
+        # Response extraction
+        # print(colored("\n[DEBUG] RESPONSE EXTRACTION:", "cyan"))
         if isinstance(concise_llm_output, ConciseLLMOutput):
-            # print(f"Message: {concise_llm_output.message}")
-            state["concise_llm_output"] = concise_llm_output.message
+            response = concise_llm_output.message
+            # print("Extracted from Pydantic model")
+        elif isinstance(concise_llm_output, dict):
+            response = concise_llm_output.get('message', '')
+            # print("Extracted from dictionary")
         else:
-            state["concise_llm_output"] = "Please ask the question again, sir!"
-            print("Unexpected response format from agent_concise_llm_output.")
+            response = str(concise_llm_output)
+            # print("Converted to string")
         
+        # print(f"Extracted Response (type: {type(response)}): {repr(response)}")
 
-    except ValidationError as e:
-        print(colored(f"ERROR: Code review validation failed with error: {e}", "red"))
-        state["concise_llm_output"] = "Please ask the question again, sir!"
-    
+        # Content validation
+        # print(colored("\n[DEBUG] RESPONSE VALIDATION:", "cyan"))
+        if not isinstance(response, str):
+            raise TypeError(f"Response is {type(response)}, expected string")
+            
+        if len(response) < 3:
+            raise ValueError(f"Response too short: {len(response)} characters")
+            
+        if final_output not in response:
+            raise ValueError(f"Final output '{final_output}' not found in response")
+
+        # Final assignment
+        state["concise_llm_output"] = response
+        print(colored("\n[DEBUG] FINAL STATE UPDATE:", "green"))
+        print(f"concise_llm_output: {repr(response)}")
+
     except Exception as e:
-        print(colored(f"ERROR: Error parsing JSON: {e}", "red"))
-        state["concise_llm_output"] = "Please ask the question again, sir!"
-    
-    print(colored("DEBUG: agent_concise_llm_output state", "magenta"))
-    pretty_print_state_enhanced(state)
+        # print(colored(f"\n[ERROR] {type(e).__name__}: {str(e)}", "red"))
+        # print(colored("[ERROR] CURRENT STATE VALUES:", "red"))
+        # print(f"Initial Request: {repr(initial_request)}")
+        # print(f"Final Output: {repr(final_output)}")
+        
+        # Fallback with type safety
+        fallback = f"{initial_request} The result is {final_output}."
+        print(colored(f"[ERROR] USING FALLBACK: {repr(fallback)}", "yellow"))
+        state["concise_llm_output"] = fallback
 
-    return state  # Always return state
+    # print(colored("\n=== END CONCISE LLM AGENT ===", "magenta", attrs=["bold"]))
+    return state

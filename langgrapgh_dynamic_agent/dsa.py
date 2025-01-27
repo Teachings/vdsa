@@ -94,8 +94,8 @@ def produce_message(message_dict):
         producer.produce(topic=TOPIC_OUTPUT, value=json.dumps(message_dict))
         producer.flush()
 
-        log(f"JSON message sent to topic '{TOPIC_OUTPUT}': {message_dict}",
-            level="INFO", color="green")
+        # log(f"JSON message sent to topic '{TOPIC_OUTPUT}': {message_dict}",
+        #     level="INFO", color="green")
     except Exception as e:
         log(f"Failed to send JSON message: {e}", level="ERROR", color="red")
 

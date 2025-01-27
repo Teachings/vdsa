@@ -10,8 +10,8 @@ voice-model: "large-v3-turbo" # Specify the voice model to use (e.g., "large-v3"
 
 # List of favorite microphones
 favorite_microphones:
-  - "Elgato Wave XLR" # A preferred microphone model
-  # - "Jabra SPEAK 410" # Another preferred microphone model (commented out)
+  # - "Elgato Wave XLR" # A preferred microphone model
+  - "Jabra SPEAK 410" # Another preferred microphone model (commented out)
   - MacBook Pro Microphone
 
 # Time gap threshold in seconds to determine if a new speech segment starts
