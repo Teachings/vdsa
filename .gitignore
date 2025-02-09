@@ -61,3 +61,4 @@ transcriptions_*.json
 
 mlx_models/
 logs/
+.DS_Store
