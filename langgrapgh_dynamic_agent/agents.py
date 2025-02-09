@@ -7,29 +7,33 @@ from pydantic import ValidationError
 from langchain_ollama import ChatOllama
 from models import CodeReviewResult, AgentState, ConciseLLMOutput
 from utils import pretty_print_state_enhanced
+from helpers import load_config
 
 
 # Import the prompt templates from the new file
 from prompts import preprocessor_prompt_template, code_generation_prompt_template, code_review_prompt_template, concise_llm_prompt_template
+config = load_config()
+
+
 
 # Define model
 model = ChatOllama(
     base_url="http://localhost:11434",
-    model="llama3.2" #deepseek-coder-v2 nemotron qwen2.5-coder:32b llama3.2
+    model=config["llm"]["preprocessor_model"] #deepseek-coder-v2 nemotron qwen2.5-coder:32b llama3.2
 )
 
 model_code_generator = ChatOllama(
     base_url="http://localhost:11434",
-    model="llama3.2" #deepseek-coder-v2 nemotron qwen2.5-coder:32b llama3.2
+    model=config["llm"]["code_generator_model"] #deepseek-coder-v2 nemotron qwen2.5-coder:32b llama3.2
 )
 
 # Define model
 model_json = ChatOllama(
     base_url="http://localhost:11434",
-    model="qwen2.5-coder",
+    model=config["llm"]["code_review_model"],
     format="json"
 )
-
+# config.get("device", "cuda")
 # Initialize models for preprocessor, code generation, and code review agents
 preprocessor_model = model
 code_generator_model = model_code_generator

@@ -4,15 +4,15 @@
 user: "mukul" # The username associated with this configuration
 
 # Speech to text settings 
-device: "cuda" # Specify the device to use for processing ("cuda" for NVIDIA GPUs or "mps" for apple silicon or "cpu")
+device: "mps" # Specify the device to use for processing ("cuda" for NVIDIA GPUs or "mps" for apple silicon or "cpu")
 compute_type: "int8" # Specify the compute type ("float16" for CUDA, "int8" for mps and CPU)
-voice-model: "large-v3-turbo" # Specify the voice model to use (e.g., "large-v3" for mps or "large-v3-turbo" for nvidia or  "base.en" for cpu)
+voice-model: "large-v3" # Specify the voice model to use (e.g., "large-v3" for mps or "large-v3-turbo" for nvidia or  "base.en" for cpu)
 
 # List of favorite microphones
 favorite_microphones:
-  # - "Elgato Wave XLR" # A preferred microphone model
+  - "Elgato Wave XLR" # A preferred microphone model
   - "Jabra SPEAK 410" # Another preferred microphone model (commented out)
-  - MacBook Pro Microphone
+  # - MacBook Pro Microphone
 
 # Time gap threshold in seconds to determine if a new speech segment starts
 time_gap_threshold: 1 # The time gap in seconds considered as the start of a new speech segment
@@ -30,3 +30,9 @@ kafka:
   topic_dsa_response: "dsa.agent.response" # The Kafka topic to publish all agent responses
   consumer_group_dsa_name: "langgraph_dsa_consumer"
   auto_offset_reset_dsa: "latest"
+
+## Configuration for DSA Agent
+llm:
+  preprocessor_model: "qwen2.5-coder"
+  code_generator_model: "qwen2.5-coder"
+  code_review_model: "qwen2.5-coder"

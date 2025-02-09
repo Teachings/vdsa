@@ -14,7 +14,7 @@ torchaudio
 sounddevice
 scipy
 faster-whisper
-# lightning-whisper-mlx
+lightning-whisper-mlx
 kafka-python
 pydantic
 pydub
