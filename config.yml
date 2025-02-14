@@ -36,3 +36,5 @@ llm:
   preprocessor_model: "qwen2.5-coder"
   code_generator_model: "qwen2.5-coder"
   code_review_model: "qwen2.5-coder"
+
+log_level: "info" # "debug" or "info"
